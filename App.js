@@ -6,7 +6,8 @@
  * @flow strict-local
  */
 
-import React, {Component} from 'react';
+import React, {Component, useEffect, useState} from 'react';
+import api from './services/api';
 import {
   SafeAreaView,
   StyleSheet,
@@ -17,44 +18,32 @@ import {
   TouchableOpacity,
 } from 'react-native';
 
-export default class App extends Component {
-  state = {
-    planet: '',
-    dados: {
-      name: '',
-      gravity: '',
-      terrain: '',
-      residents: 0,
-      ibge: '',
-    },
-  };
-  componentDidMount() {
-    fetch('https://swapi.dev/api/planets/1')
-      .then((res) => res.json())
-      .then((data) => {
-        this.setState({
-          dados: data,
-        });
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  }
+export default function App() {
+  const [planets, setPlanets] = useState([]);
 
-  render() {
-    return (
-      <View style={styles.container}>
-        <TouchableOpacity style={styles.button}>
-          <Text>{this.state.dados.name}</Text>
-        </TouchableOpacity>
+  useEffect(() => {
+    api.get('/').then((response) => {
+      console.log(response.data);
+      setPlanets(response.data.results);
+    });
+  });
 
-        <Text>Planeta: {this.state.dados.name}</Text>
-        <Text>Terreno: {this.state.dados.terrain}</Text>
-        <Text>Gravidade: {this.state.dados.gravity}</Text>
-        <Text>Diametro: {this.state.dados.diameter}</Text>
-      </View>
-    );
-  }
+  return (
+    <>
+      <ScrollView>
+        <View style={styles.container}>
+          {planets.map((planet) => (
+            <TouchableOpacity style={styles.button}>
+              <Text key={planet.name}> NOME : {planet.name}</Text>
+              <Text> DIAMETRO : {planet.diameter}</Text>
+              <Text> CLIMA : {planet.climate}</Text>
+              <Text> Gravidade : {planet.gravity}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </ScrollView>
+    </>
+  );
 }
 
 const styles = StyleSheet.create({
@@ -63,16 +52,11 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
     paddingVertical: 200,
   },
-  containers: {
-    flex: 1,
-    marginHorizontal: 20,
-    paddingVertical: 200,
-  },
   button: {
     marginTop: 10,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'gray',
+    backgroundColor: '#D0D0D0',
     paddingHorizontal: 20,
     paddingVertical: 15,
   },
